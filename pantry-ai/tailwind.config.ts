@@ -13,7 +13,27 @@ const config: Config = {
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
-    },
+        fontFamily: {
+          'playfair': ['"Playfair Display"', 'serif'],
+          'merriweather-light':["Merriweather", 'serif'],
+          'manrope': ['Manrope', 'sans-serif'],
+        },
+        fontWeight: {
+          'light': '300',
+          'normal': '400',
+          'medium': '500',
+          'semibold': '600',
+          'bold': '700',
+          'extrabold': '800',
+          'black': '900',
+        },
+        boxShadow: {
+          'perfect':'box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px',
+        },
+        backgroundColor: {
+          'matt': '#333'
+        }
+      },
   },
   plugins: [],
 };

@@ -2,7 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { db } from './firebaseConfig';
-import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, getDocs } from 'firebase/firestore';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Pagination from '@mui/material/Pagination';
+import { styled } from '@mui/material/styles';
 
 interface InventoryItem {
   id: string;
@@ -11,12 +15,22 @@ interface InventoryItem {
   msrp: number; // MSRP for one item
 }
 
+const SearchContainer = styled('div')({
+  marginTop: '20px',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+});
+
 const Page = () => {
   const [item, setItem] = useState<string>('');
   const [quantity, setQuantity] = useState<string>('');
   const [msrp, setMsrp] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState<string>('');
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'inventory'), (snapshot) => {
@@ -25,6 +39,7 @@ const Page = () => {
         ...doc.data(),
       })) as InventoryItem[];
       setInventory(items);
+      setError(null);
     }, (error) => {
       console.error('Error fetching inventory: ', error);
       setError('Failed to fetch inventory.');
@@ -59,7 +74,10 @@ const Page = () => {
     try {
       const itemDoc = doc(db, 'inventory', id);
       const updatedItem = inventory.find(item => item.id === id);
-      if (!updatedItem) return;
+      if (!updatedItem) {
+        setError('Item not found.');
+        return;
+      }
 
       await updateDoc(itemDoc, { quantity: updatedQuantity });
       setError(null);
@@ -80,11 +98,32 @@ const Page = () => {
     }
   }, []);
 
+  const handleSearch = async () => {
+    try {
+      const q = query(collection(db, 'inventory'), where('item', '==', searchTerm));
+      const querySnapshot = await getDocs(q);
+      const searchResults = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as InventoryItem[];
+      setInventory(searchResults);
+      setError(null);
+    } catch (e) {
+      console.error('Error searching inventory: ', e);
+      setError('Failed to search inventory.');
+    }
+  };
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = inventory.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(inventory.length / itemsPerPage);
+
   return (
-    <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-4 min-h-screen bg-cover bg-center" style={{ backgroundImage: 'url(https://i.pinimg.com/originals/da/24/dd/da24dd4512e3ef96adc79fb3ad2849ab.gif)' }}>
-      <div className="bg-white bg-opacity-75 p-8 rounded-lg shadow-lg h-full flex flex-col justify-between">
-        <div>
-          <h1 className="text-2xl font-bold mb-4">Pantry Tracking System</h1>
+    <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-4 min-h-screen" style={{ backgroundImage:'url(https://images.pexels.com/photos/1103970/pexels-photo-1103970.jpeg?cs=srgb&dl=pexels-jplenio-1103970.jpg&fm=jpg)' }}>
+      <div className="relative bg-opacity-75 p-8 rounded-lg shadow-lg h-full flex flex-col justify-between">
+      <div className="relative z-10">
+          <h1 className="text-2xl font-bold mb-4 font-merriweather-light font-light" style={{ color: '#333' }}>Pantry Tracking System</h1>
           {error && <div className="text-red-500 mb-4">{error}</div>}
           <input
             type="text"
@@ -109,36 +148,50 @@ const Page = () => {
           />
         </div>
         <button
-          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+          className="relative z-10 w-full p-2 rounded hover:bg-opacity-90"
           onClick={handleAddItem}
+          style={{ backgroundColor: '#254E70', color: 'white' }}
         >
           Add Item
         </button>
+        <div className="absolute inset-0 bg-white bg-opacity-50 rounded-lg z-0"></div>
       </div>
-      <div className="w-full px-8 overflow-auto h-full mt-4">
-        <table className="min-w-full bg-white rounded-t-2xl">
+      <div className="w-full px-8 overflow-auto h-full">
+        <SearchContainer>
+          <TextField
+            label="Search Item"
+            variant="outlined"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            sx={{ marginRight: '10px', width: '300px' }}
+          />
+          <Button variant="contained" onClick={handleSearch} style={{ backgroundColor: '#37718E', color: 'white' }}>
+            Search
+          </Button>
+        </SearchContainer>
+        <table className="min-w-full bg-white rounded-t-2xl bg-opacity-75 mt-4">
           <thead>
-            <tr>
-              <th className="py-2 px-4 border-b">Item</th>
-              <th className="py-2 px-4 border-b">Quantity</th>
-              <th className="py-2 px-4 border-b">Total MSRP</th>
-              <th className="py-2 px-4 border-b">Actions</th>
+            <tr style={{ backgroundColor: '#37718E', color: 'white' }}>
+              <th className="py-2 px-4 border-b font-playfair">Item</th>
+              <th className="py-2 px-4 border-b font-playfair">Quantity</th>
+              <th className="py-2 px-4 border-b font-playfair">Total MSRP</th>
+              <th className="py-2 px-4 border-b font-playfair">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {inventory.map(item => (
+            {currentItems.map(item => (
               <tr key={item.id}>
-                <td className="py-2 px-4 border-b text-center">{item.item}</td>
-                <td className="py-2 px-4 border-b text-center">{item.quantity}</td>
-                <td className="py-2 px-4 border-b text-center">${(item.msrp * item.quantity).toFixed(2)}</td>
+                <td className="py-2 px-4 border-b text-center" style={{ color: '#254E70' }}>{item.item}</td>
+                <td className="py-2 px-4 border-b text-center" style={{ color: '#254E70' }}>{item.quantity}</td>
+                <td className="py-2 px-4 border-b text-center" style={{ color: '#254E70' }}>${(item.msrp * item.quantity).toFixed(2)}</td>
                 <td className="py-2 px-4 border-b flex space-x-2 justify-center">
-                  <button onClick={() => handleUpdateItem(item.id, item.quantity + 1)} className="px-2 bg-green-500 text-white rounded hover:bg-green-600">
+                  <button onClick={() => handleUpdateItem(item.id, item.quantity + 1)} className="px-2 rounded hover:bg-opacity-90" style={{ backgroundColor: '#8EE3EF', color: '#254E70' }}>
                     +
                   </button>
-                  <button onClick={() => handleUpdateItem(item.id, item.quantity - 1)} className="px-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">
+                  <button onClick={() => handleUpdateItem(item.id, item.quantity - 1)} className="px-2 rounded hover:bg-opacity-90" style={{ backgroundColor: '#8EE3EF', color: '#254E70' }}>
                     -
                   </button>
-                  <button onClick={() => handleDeleteItem(item.id)} className="px-1 bg-red-500 text-white rounded hover:bg-red-600">
+                  <button onClick={() => handleDeleteItem(item.id)} className="px-1 rounded hover:bg-opacity-90" style={{ backgroundColor: '#c33c54', color: 'white' }}>
                     🗑
                   </button>
                 </td>
@@ -146,6 +199,12 @@ const Page = () => {
             ))}
           </tbody>
         </table>
+        <Pagination
+          count={totalPages}
+          page={currentPage}
+          onChange={(event, value) => setCurrentPage(value)}
+          sx={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}
+        />
       </div>
     </div>
   );
