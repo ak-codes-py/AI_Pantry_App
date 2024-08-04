@@ -122,7 +122,7 @@ const Page = () => {
   return (
     <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-4 min-h-screen" style={{ backgroundImage:'url(https://images.pexels.com/photos/1103970/pexels-photo-1103970.jpeg?cs=srgb&dl=pexels-jplenio-1103970.jpg&fm=jpg)' }}>
       <div className="relative bg-opacity-75 p-8 rounded-lg shadow-lg h-full flex flex-col justify-between">
-      <div className="relative z-10">
+        <div className="relative z-10">
           <h1 className="text-2xl font-bold mb-4 font-merriweather-light font-light" style={{ color: '#333' }}>Pantry Tracking System</h1>
           {error && <div className="text-red-500 mb-4">{error}</div>}
           <input
@@ -147,13 +147,15 @@ const Page = () => {
             onChange={(e) => setMsrp(e.target.value)}
           />
         </div>
-        <button
-          className="relative z-10 w-full p-2 rounded hover:bg-opacity-90"
-          onClick={handleAddItem}
-          style={{ backgroundColor: '#254E70', color: 'white' }}
-        >
-          Add Item
-        </button>
+        <div className="flex justify-center">
+          <button
+            className="relative z-10 p-2 rounded-3xl hover:bg-opacity-90 px-6"
+            onClick={handleAddItem}
+            style={{ backgroundColor: '#254E70', color: 'white' }}
+          >
+            Add Item
+          </button>
+        </div>
         <div className="absolute inset-0 bg-white bg-opacity-50 rounded-lg z-0"></div>
       </div>
       <div className="w-full px-8 overflow-auto h-full">
@@ -169,7 +171,7 @@ const Page = () => {
             Search
           </Button>
         </SearchContainer>
-        <table className="min-w-full bg-white rounded-t-2xl bg-opacity-75 mt-4">
+        <table className="min-w-full bg-white rounded-t-2xl bg-opacity-75 mt-4 p-4">
           <thead>
             <tr style={{ backgroundColor: '#37718E', color: 'white' }}>
               <th className="py-2 px-4 border-b font-playfair">Item</th>
@@ -185,13 +187,13 @@ const Page = () => {
                 <td className="py-2 px-4 border-b text-center" style={{ color: '#254E70' }}>{item.quantity}</td>
                 <td className="py-2 px-4 border-b text-center" style={{ color: '#254E70' }}>${(item.msrp * item.quantity).toFixed(2)}</td>
                 <td className="py-2 px-4 border-b flex space-x-2 justify-center">
-                  <button onClick={() => handleUpdateItem(item.id, item.quantity + 1)} className="px-2 rounded hover:bg-opacity-90" style={{ backgroundColor: '#8EE3EF', color: '#254E70' }}>
+                  <button onClick={() => handleUpdateItem(item.id, item.quantity + 1)} className="px-2 rounded hover:bg-opacity-90" style={{ backgroundColor: '#8fdaff', color: '#254E70' }}>
                     +
                   </button>
-                  <button onClick={() => handleUpdateItem(item.id, item.quantity - 1)} className="px-2 rounded hover:bg-opacity-90" style={{ backgroundColor: '#8EE3EF', color: '#254E70' }}>
+                  <button onClick={() => handleUpdateItem(item.id, item.quantity - 1)} className="px-2 rounded- hover:bg-opacity-90" style={{ backgroundColor: '#b1faf9', color: '#254E70' }}>
                     -
                   </button>
-                  <button onClick={() => handleDeleteItem(item.id)} className="px-1 rounded hover:bg-opacity-90" style={{ backgroundColor: '#c33c54', color: 'white' }}>
+                  <button onClick={() => handleDeleteItem(item.id)} className="px-2 rounded hover:bg-opacity-90" style={{ backgroundColor: '#fa8e97', color: 'white' }}>
                     🗑
                   </button>
                 </td>
