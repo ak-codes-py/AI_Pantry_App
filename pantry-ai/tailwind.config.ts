@@ -17,6 +17,7 @@ const config: Config = {
           'playfair': ['"Playfair Display"', 'serif'],
           'merriweather-light':["Merriweather", 'serif'],
           'manrope': ['Manrope', 'sans-serif'],
+          'space-grotesk':["Space Grotesk", "sans-serif"]
         },
         fontWeight: {
           'light': '300',
@@ -29,6 +30,7 @@ const config: Config = {
         },
         boxShadow: {
           'perfect':'box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px',
+          '3d': 'rgba(0, 0, 0, 0.2) 0px 60px 40px -7px;'
         },
         backgroundColor: {
           'matt': '#333'
